@@ -5,6 +5,9 @@ import { BlogResponseDto } from "../dto/response/blog-response.dtp";
 import { BlogRequestDto, UpdateBlogRequestDto } from "../dto/request/blog-request.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { AddBlogTag } from "../dto/request/add-mapped-tag.dto";
+import { CommentResponseDto } from "../dto/response/comment-response.dto";
+import { CommentRequestDto } from "../dto/request/comment-request.dto";
+import { CommentService } from "../service/comment.service";
 
 @ApiTags('Blog')
 @ApiBearerAuth("JWT-auth")
@@ -12,7 +15,7 @@ import { AddBlogTag } from "../dto/request/add-mapped-tag.dto";
 @Controller({ path: 'blogs' })
 
 export class BlogController {
-    constructor(private blogService: BlogService) { }
+    constructor(private blogService: BlogService, private commentService : CommentService) { }
 
     @Get()
     @ApiOkResponse({ type: BlogResponseDto })
@@ -24,6 +27,12 @@ export class BlogController {
     @ApiOkResponse({ type: BlogResponseDto })
     async find(@Param('id') id: number, @Request() req): Promise<BlogResponseDto> {
         return this.blogService.findOne(id,req.user.id)
+    };
+
+    @Get('/:id/comments')
+    @ApiOkResponse({ type: [CommentResponseDto] })
+    async blogComments(@Param('id') id: number, @Request() req): Promise<CommentResponseDto[]> {
+        return this.commentService.blogComments(id)
     };
 
     @Post()
@@ -65,6 +74,21 @@ export class BlogController {
         this.blogService.addBlogTag(blogId,dto,req.user.id)
         return "Ok"
     };
+
+
+
+    @Post(":id/comments")
+    @ApiOkResponse({ type: CommentResponseDto })
+    async createBlogComment(@Body() dto: CommentRequestDto, @Param('id') blogId: number, @Request() req): Promise<CommentResponseDto> {
+        return await this.commentService.create(dto,blogId,req.user.id);
+    };
+
+    @Delete(":id/comments/:comment_id")
+    @ApiOkResponse({ type: CommentResponseDto })
+    async deleteBlogComment(@Param('comment_id') commentId: number, @Param('id') blogId: number, @Request() req): Promise<String> {
+        return await this.commentService.deleteBlogComment(commentId,blogId,req.user.id);
+    };
+
 
 
 };

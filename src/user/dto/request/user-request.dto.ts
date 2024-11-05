@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class UserRequestDto {
+
     @ApiProperty()
     @IsNotEmpty()
     @IsString()
@@ -16,5 +17,14 @@ export class UserRequestDto {
     @IsNotEmpty()
     @IsString()
     password: string;
+
+}
+
+export class UserUpdateRequestDto {
+
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    name: string;
 
 }

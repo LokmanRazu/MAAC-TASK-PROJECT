@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { User } from "../entity/user.entity";
 import { UserResponseDto, UserResponseDtoWithPassword } from "../dto/response/user-response.dto";
-import { UserRequestDto } from "../dto/request/user-request.dto";
+import { UserRequestDto, UserUpdateRequestDto } from "../dto/request/user-request.dto";
 import { hashPassword } from "src/common/utils/utils";
 import { plainToInstance } from "class-transformer";
 
@@ -13,10 +13,20 @@ export class UserService {
 
     async findAll(): Promise<UserResponseDto[]> {
         let data = await this.userModel.findAll();
-        return plainToInstance(UserResponseDto, data,{
+        return plainToInstance(UserResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
+    };
+
+    async findUsersByIds(userIds): Promise<User[]> {
+        let data = await this.userModel.findAll({
+            where: {
+                id: userIds
+            },
+            raw:true
+        });
+        return data;
     };
 
     async findOne(id: number): Promise<UserResponseDto> {
@@ -36,7 +46,7 @@ export class UserService {
     };
 
     async creat(dto: UserRequestDto): Promise<UserResponseDto> {
-        let {name, email, password } = dto;
+        let { name, email, password } = dto;
         let data = await this.userModel.create({
             name,
             email,
@@ -48,7 +58,7 @@ export class UserService {
         });
     };
 
-    async update(id: number, dto: UserRequestDto): Promise<UserResponseDto> {
+    async update(id: number, dto: UserUpdateRequestDto): Promise<UserResponseDto> {
         let user = await this.userModel.findByPk(id);
         let data = await user.update(dto);
         return plainToInstance(UserResponseDto, data, {
@@ -61,7 +71,7 @@ export class UserService {
     async delete(id: number): Promise<UserResponseDto> {
         let user = await this.userModel.findByPk(id);
 
-        console.log("user        rr   "+user)
+        console.log("user        rr   " + user)
         let data = await user.destroy()
         return plainToInstance(UserResponseDto, data, {
             enableImplicitConversion: true,

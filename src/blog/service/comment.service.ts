@@ -6,39 +6,28 @@ import { Comment } from "../entity/comment.entity";
 import { CommentResponseDto } from "../dto/response/comment-response.dto";
 import { CommentRequestDto } from "../dto/request/comment-request.dto";
 import { Blog } from "../entity/blog.entity";
+import { BlogService } from "./blog.service";
+import { UserService } from "src/user/service/user.service";
 
 @Injectable()
 export class CommentService {
-    constructor(@InjectModel(Comment) private commentModel: typeof Comment) {
+
+    constructor(@InjectModel(Comment) private commentModel: typeof Comment, private blogService: BlogService, private userService: UserService) {
     }
 
-    async findAll(userId: number): Promise<CommentResponseDto[]> {
-        let data = await this.commentModel.findAll({
-            where:{
-                userId: userId
-            }
-        });
-        return plainToInstance(CommentResponseDto, data, {
-            enableImplicitConversion: true,
-            excludeExtraneousValues: true
-        });
-    };
+    async create(dto: CommentRequestDto, blogId: number, userId: number): Promise<CommentResponseDto> {
+        let { body } = dto;
 
-    async findOne(id: number,userId): Promise<CommentResponseDto> {
-        let data = await this.commentModel.findOne({ where:{id,userId:userId} });
-        return plainToInstance(CommentResponseDto, data, {
-            enableImplicitConversion: true,
-            excludeExtraneousValues: true
-        });
-    };
+        let blog = await this.blogService.findBlogById(blogId);
+        if (!blog) {
+            throw new NotFoundException()
+        }
 
-    async create(dto: CommentRequestDto): Promise<CommentResponseDto> {
-        let {  body, userId,blogId } = dto;
         let data = await this.commentModel.create({
             body,
             userId,
             blogId,
-            
+
         });
         return plainToInstance(CommentResponseDto, data, {
             enableImplicitConversion: true,
@@ -46,36 +35,45 @@ export class CommentService {
         });
     };
 
-    async update(id: number, dto: CommentRequestDto,userId:any): Promise<CommentResponseDto> {
 
-        let blog = await this.commentModel.findOne({ where: { id,userId: userId } })
+    async deleteBlogComment(comment_id: any, blogId: number, userId: number): Promise<String> {
+        let blog = await this.blogService.findBlogById(blogId);
         if (!blog) {
             throw new NotFoundException()
         }
+        await this.commentModel.destroy({
+            where: {
+                id: comment_id,
+                blogId: blog.id,
+                userId: userId
+            }
+        })
+        return "Ok"
+    }
 
-        let user = await this.commentModel.findByPk(id);
-        let data = await user.update(dto);
-        return plainToInstance(CommentResponseDto, data, {
-            enableImplicitConversion: true,
-            excludeExtraneousValues: true
-        });
-
-    };
-
-    async delete(id: number, userId: number): Promise<CommentResponseDto> {
-        let blog = await this.commentModel.findOne({ where: { id,userId: userId } })
+    async blogComments(blogId: number): Promise<CommentResponseDto[]> {
+        let blog = await this.blogService.findBlogById(blogId);
         if (!blog) {
-            throw new NotFoundException()
+           return [];
         }
 
-        let user = await this.commentModel.findByPk(id);
-
-        let data = await user.destroy()
-        return plainToInstance(CommentResponseDto, data, {
-            enableImplicitConversion: true,
-            excludeExtraneousValues: true
+        let comments = await this.commentModel.findAll({
+            where:{
+                blogId: blogId
+            },
+            raw: true
         })
 
-    };
+        let userIds = comments.map(comment=> comment.userId);
+        let users = await this.userService.findUsersByIds(userIds);
+        comments.forEach(comment=>{
+            comment['user'] = users.find(user=> user.id == comment.userId)
+        })
+       
+        return plainToInstance(CommentResponseDto, comments,{
+            excludeExtraneousValues:true,
+            enableImplicitConversion:true
+        })
+    }
 
 }

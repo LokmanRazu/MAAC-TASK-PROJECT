@@ -4,6 +4,7 @@ import { Expose } from "class-transformer";
 
 
 export class CommentUser{
+
     @ApiProperty()
     @Expose()
     id: number;
@@ -11,24 +12,19 @@ export class CommentUser{
     @ApiProperty()
     @Expose()
     name: string;
+
 }
 
-export class CommentResponseDto {
-    @ApiProperty()
-    @ApiProperty()
-    @Expose()
-    body: string;
-
-
-    @ApiProperty()
-    @Expose()
-    blogId: number;
+export class CommentResponseDto{
 
     @ApiProperty()
     @Expose()
     id: number;
 
-    
+    @ApiProperty()
+    @Expose()
+    body: string;
+
     @ApiProperty()
     @Expose()
     user: CommentUser

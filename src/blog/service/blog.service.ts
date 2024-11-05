@@ -21,7 +21,7 @@ export class BlogService {
         if (!blog) {
             throw new NotFoundException()
         }
-    
+
         await this.tagMappedService.deleteMapTag(blog.id, tagId)
         return "Ok"
     }
@@ -77,11 +77,20 @@ export class BlogService {
             let tagIds = mappedTags.map(mapTag => mapTag.tagId)
             tags = await this.tagService.findByIds(tagIds)
         }
-        console.log("tags===", tags)
         return plainToInstance(BlogResponseDto, { ...blog, tags }, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
+    };
+
+    async findBlogByIdAndUserId(id: number, userId): Promise<Blog> {
+        let blog = await this.blogModel.findOne({ where: { id, userId: userId }, raw: true });
+        return blog
+    };
+
+    async findBlogById(id: number): Promise<Blog> {
+        let blog = await this.blogModel.findOne({ where: { id }, raw: true });
+        return blog
     };
 
     async create(dto: BlogRequestDto, userId: number): Promise<BlogResponseDto> {
