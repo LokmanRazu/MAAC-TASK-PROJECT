@@ -1,6 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
+import { Expose, Transform } from "class-transformer";
 
+
+export class Tag {
+    @ApiProperty()
+    @Expose()
+    id: number;
+
+    @ApiProperty()
+    @Expose()
+    name: string;
+}
 
 export class BlogResponseDto {
     @ApiProperty()
@@ -18,5 +28,10 @@ export class BlogResponseDto {
     @ApiProperty()
     @Expose()
     userId: number;
+
+    @ApiProperty()
+    @Expose()
+    @Transform(value=>value.obj?.tags??[])
+    tags: Tag[]
 
 }

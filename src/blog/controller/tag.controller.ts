@@ -16,31 +16,11 @@ export class TagController {
         return this.tagService.findAll()
     };
 
-    @Get('/:id')
-    @ApiOkResponse({ type: TagResponseDto })
-    async find(@Param('id') id: number): Promise<TagResponseDto> {
-        console.log(id)
-        return this.tagService.findOne(id)
-    };
 
     @Post()
     @ApiOkResponse({ type: TagResponseDto })
     async save(@Body() dto: TagRequestDto): Promise<TagResponseDto> {
-        return await this.tagService.creat(dto);
-    };
-
-
-    @Put('/:id')
-    @ApiOkResponse({ type: TagResponseDto })
-    async update(@Param('id') id: number, @Body() dto: TagRequestDto): Promise<TagResponseDto> {
-        return await this.tagService.update(id, dto);
-    };
-
-    @Delete('/:id')
-    @ApiOkResponse({ type: TagResponseDto })
-    async delete(@Param('id') id: number): Promise<TagResponseDto> {
-        console.log(id)
-        return this.tagService.delete(id)
+        return await this.tagService.create(dto);
     };
 
 };

@@ -14,13 +14,21 @@ export class BlogRequestDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    @IsNumber()
-    userId: number;
+    @IsString()
+    tagIds:string[]; 
+
+
+};
+
+export class UpdateBlogRequestDto {
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsString()
+    title: string;
 
     @ApiProperty()
     @IsNotEmpty()
-    @IsNumber()
-    tags: [];
+    @IsString()
+    body: string;
 
-
-}
+};

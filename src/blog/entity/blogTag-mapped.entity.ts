@@ -11,12 +11,9 @@ export class BlogTagMapped extends Model<BlogTagMapped>{
     })
     id: number;
 
-
-    @ForeignKey(() => Blog)
     @Column
     blogId: number;
 
-    @ForeignKey(() => Tag)
     @Column
     tagId: number;
     

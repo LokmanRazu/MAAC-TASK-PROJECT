@@ -33,6 +33,4 @@ export class Comment extends Model<Comment>{
     @BelongsTo(() => Blog) 
     blog: Blog;
 
-
-
 };

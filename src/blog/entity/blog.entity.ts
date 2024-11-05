@@ -1,7 +1,5 @@
 import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, IsEmail, Model, Table, Unique } from "sequelize-typescript";
 import { User } from "src/user/entity/user.entity";
-import { Tag } from "./tag.entity";
-import { BlogTagMapped } from "./blogTag-mapped.entity";
 import { Comment } from "./comment.entity";
 
 @Table
@@ -34,8 +32,5 @@ export class Blog extends Model<Blog>{
 
     @HasMany(()=>Comment,{onDelete: "CASCADE",onUpdate: "CASCADE",hooks:true})
     comments:Comment[]
-
-    @BelongsToMany(()=> Tag, ()=> BlogTagMapped )
-    tags:Tag[]
 
 };

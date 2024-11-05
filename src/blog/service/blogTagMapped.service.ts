@@ -8,11 +8,54 @@ import { BlogTagMappedRequestDto } from "../dto/request/blogTagMapped-request.dt
 
 @Injectable()
 export class BlogTagMappedService {
+
+
     constructor(@InjectModel(BlogTagMapped) private blogTagMappedModel: typeof BlogTagMapped) {
     }
 
-    async findAll(): Promise<BlogTagMappedResponseDto[]> {
-        let data = await this.blogTagMappedModel.findAll();
+    async addBlogTag(id: number, tagId: number) {
+        let alredyHas = await this.blogTagMappedModel.findOne({
+            where: {
+                blogId: id,
+                tagId: tagId
+            }
+        })
+        if (!alredyHas) {
+            await this.blogTagMappedModel.create({
+                tagId: tagId,
+                blogId: id
+            });
+        }
+        return "Ok"
+    }
+    async deleteMapTag(blogId: number, tagId: number) {
+        await this.blogTagMappedModel.destroy({
+            where: {
+                blogId: blogId,
+                id: tagId
+            }
+        })
+    }
+
+    async findAllByBlogId(blogId: number): Promise<BlogTagMappedResponseDto[]> {
+        let data = await this.blogTagMappedModel.findAll({
+            where: {
+                blogId: blogId
+            }
+        });
+        return plainToInstance(BlogTagMappedResponseDto, data, {
+            enableImplicitConversion: true,
+            excludeExtraneousValues: true
+        });
+    };
+
+    async findAllByBlogIds(blogIds: number[]): Promise<BlogTagMappedResponseDto[]> {
+        let data = await this.blogTagMappedModel.findAll({
+            where: {
+                blogId: blogIds
+            },
+            raw: true
+        });
         return plainToInstance(BlogTagMappedResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
@@ -20,48 +63,19 @@ export class BlogTagMappedService {
     };
 
     async findOne(id: number): Promise<BlogTagMappedResponseDto> {
-        let data = await this.blogTagMappedModel.findOne({ where: { id }});
+        let data = await this.blogTagMappedModel.findOne({ where: { id } });
         return plainToInstance(BlogTagMappedResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
     };
 
-    async creat(dto: BlogTagMappedRequestDto): Promise<BlogTagMappedResponseDto> {
-        let { id, blogId,tagId} = dto;
-        let data = await this.blogTagMappedModel.create({
-            id,
-            blogId,
-            tagId
-        });
+    async create(dto: BlogTagMappedRequestDto[]): Promise<BlogTagMappedResponseDto[]> {
+        let data = await this.blogTagMappedModel.bulkCreate(dto);
         return plainToInstance(BlogTagMappedResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
     };
-
-    async update(id: number, dto: BlogTagMappedRequestDto): Promise<BlogTagMappedResponseDto> {
-        let user = await this.blogTagMappedModel.findByPk(id);
-        let data = await user.update(dto);
-        return plainToInstance(BlogTagMappedResponseDto, data, {
-            enableImplicitConversion: true,
-            excludeExtraneousValues: true
-        });
-
-    };
-
-    async delete(id: number): Promise<BlogTagMappedResponseDto> {
-        let user = await this.blogTagMappedModel.findByPk(id);
-
-        console.log("user        rr   "+user)
-        let data = await user.destroy()
-        return plainToInstance(BlogTagMappedResponseDto, data, {
-            enableImplicitConversion: true,
-            excludeExtraneousValues: true
-        })
-
-    };
-
-
 
 }

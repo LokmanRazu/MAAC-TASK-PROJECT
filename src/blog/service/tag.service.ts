@@ -8,6 +8,7 @@ import { TagRequestDto } from "../dto/request/tag-request.dto";
 
 @Injectable()
 export class TagService {
+  
     constructor(@InjectModel(Tag) private tagModel: typeof Tag) {
     }
 
@@ -19,6 +20,16 @@ export class TagService {
         });
     };
 
+    findByIds(tagIds: number[]):PromiseLike<Tag[]> {
+        
+       return this.tagModel.findAll({
+        where:{
+            id: tagIds
+        },
+        raw: true
+       })
+    }
+
     async findOne(id: number): Promise<TagResponseDto> {
         let data = await this.tagModel.findOne({ where: { id }});
         return plainToInstance(TagResponseDto, data, {
@@ -27,12 +38,10 @@ export class TagService {
         });
     };
 
-    async creat(dto: TagRequestDto): Promise<TagResponseDto> {
-        let { id, body} = dto;
+    async create(dto: TagRequestDto): Promise<TagResponseDto> {
+        let { name} = dto;
         let data = await this.tagModel.create({
-            id,
-            body,
-
+            name
         });
         return plainToInstance(TagResponseDto, data, {
             enableImplicitConversion: true,

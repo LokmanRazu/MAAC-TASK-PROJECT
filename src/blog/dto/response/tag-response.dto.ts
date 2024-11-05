@@ -9,8 +9,5 @@ export class TagResponseDto {
 
     @ApiProperty()
     @Expose()
-    body: string;
-
-
-
+    name: string;
 }

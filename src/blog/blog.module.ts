@@ -8,7 +8,6 @@ import { CommentController } from "./controller/comment.controller";
 import { CommentService } from "./service/comment.service";
 import { Tag } from "./entity/tag.entity";
 import { BlogTagMapped } from "./entity/blogTag-mapped.entity";
-import { BlogTagMappedController } from "./controller/blogTagMapped.controller";
 import { BlogTagMappedService } from "./service/blogTagMapped.service";
 import { PassportModule } from "@nestjs/passport";
 import { TagController } from "./controller/tag.controller";
@@ -20,7 +19,7 @@ import { TagService } from "./service/tag.service";
         PassportModule.register({defaultStrategy:'jwt'}),
         SequelizeModule.forFeature([Blog,Comment,Tag,BlogTagMapped])
     ],
-    controllers:[BlogController,CommentController,TagController,BlogTagMappedController],
+    controllers:[BlogController,CommentController,TagController],
     providers:[BlogService,CommentService,TagService,BlogTagMappedService],
     exports:[]
 })

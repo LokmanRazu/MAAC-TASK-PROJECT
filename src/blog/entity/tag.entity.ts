@@ -14,10 +14,6 @@ export class Tag extends Model<Tag>{
     @Column({
         allowNull:false
     })
-    body: string
-
-    @BelongsToMany(()=> Blog, ()=> BlogTagMapped)
-    blogs:Blog[]
-
+    name: string
 
 }
