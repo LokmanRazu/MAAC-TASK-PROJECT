@@ -24,4 +24,4 @@ import { UserModule } from "src/user/user.module";
     providers:[BlogService,CommentService,TagService,BlogTagMappedService],
     exports:[]
 })
-export class BlogModule{}
+export class BlogModule{};

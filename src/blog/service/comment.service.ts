@@ -1,11 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { plainToInstance } from "class-transformer";
-import { User } from "src/user/entity/user.entity";
 import { Comment } from "../entity/comment.entity";
 import { CommentResponseDto } from "../dto/response/comment-response.dto";
 import { CommentRequestDto } from "../dto/request/comment-request.dto";
-import { Blog } from "../entity/blog.entity";
 import { BlogService } from "./blog.service";
 import { UserService } from "src/user/service/user.service";
 
@@ -48,7 +46,7 @@ export class CommentService {
                 userId: userId
             }
         })
-        return "Ok"
+        return "Delete Sucessfully"
     }
 
     async blogComments(blogId: number): Promise<CommentResponseDto[]> {

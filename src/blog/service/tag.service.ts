@@ -61,8 +61,6 @@ export class TagService {
 
     async delete(id: number): Promise<TagResponseDto> {
         let user = await this.tagModel.findByPk(id);
-
-        console.log("user        rr   "+user)
         let data = await user.destroy()
         return plainToInstance(TagResponseDto, data, {
             enableImplicitConversion: true,
