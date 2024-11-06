@@ -20,6 +20,6 @@ export class UserResponseDto {
 export class UserResponseDtoWithPassword extends  UserResponseDto{
     @ApiProperty()
     @Expose()
-    password: string;
+    password: string; 
 
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotFoundException} from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { plainToInstance } from "class-transformer";
 import { Blog } from "../entity/blog.entity";
@@ -58,10 +58,9 @@ export class BlogService {
                 let tag = tags.find(tag => tag.id == mappedTag.tagId);
                 assignTags.push(tag)
             })
-            console.log("assignTags=======", assignTags)
             blog['tags'] = assignTags
         })
-        console.log("blogs======", blogs)
+    
         return plainToInstance(BlogResponseDto, blogs, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
@@ -131,7 +130,7 @@ export class BlogService {
                 id
             }
         })
-        return "Ok"
+        return "Update Sucessfull"
 
     };
 
@@ -146,7 +145,7 @@ export class BlogService {
                 id: blog.id
             }
         })
-        return "OK"
+        return "Delete Sucessfully"
     };
 
 }

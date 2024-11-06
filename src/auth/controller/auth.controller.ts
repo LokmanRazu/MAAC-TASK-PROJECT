@@ -20,6 +20,6 @@ export class AuthController{
     @ApiOkResponse({ type: String })
     async save(@Body() dto: UserRequestDto): Promise<String> {
        await this.authService.signup(dto)
-       return "OK"
+       return "Sign UP Sucessfully" 
     };
 }
