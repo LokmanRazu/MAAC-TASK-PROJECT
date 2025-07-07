@@ -14,17 +14,17 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({isGlobal:true}),
+    ConfigModule.forRoot({isGlobal:true}), 
     SequelizeModule.forRoot({
       dialect:'mysql',
-      host:'localhost',
+      host:process.env.DB_HOST,
       port:3306,
-      username:'root',
-      password:'password',
-      database:'backend-test',
+      username:process.env.DB_USERNAME,
+      password:process.env.DB_PASSWORD,
+      database:process.env.DB_DATABASE,
       models:[User,Blog,Comment,Tag,BlogTagMapped],
       autoLoadModels:true,
-      synchronize:true
+      synchronize:false
 
     }),
     UserModule,

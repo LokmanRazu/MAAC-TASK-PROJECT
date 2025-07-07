@@ -8,24 +8,27 @@ import { AddBlogTag } from "../dto/request/add-mapped-tag.dto";
 import { CommentResponseDto } from "../dto/response/comment-response.dto";
 import { CommentRequestDto } from "../dto/request/comment-request.dto";
 import { CommentService } from "../service/comment.service";
+import { RolesGuard } from "src/auth/roles.guard";
+import { Roles } from "src/common/role.decorator";
 
 @ApiTags('Blog')
 @ApiBearerAuth("JWT-auth")
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'),RolesGuard)
 @Controller({ path: 'blogs' })
 
 export class BlogController {
     constructor(private blogService: BlogService, private commentService : CommentService) { }
 
     @Get()
+    @Roles('admin')
     @ApiOkResponse({ type: BlogResponseDto })
     async findAll( @Request() req): Promise<BlogResponseDto[]> {
-        return this.blogService.findAll(req.user.id)
+        return this.blogService.findAll(req.user.id) 
     };
 
     @Get('/:id')
-    @ApiOkResponse({ type: BlogResponseDto })
-    async find(@Param('id') id: number, @Request() req): Promise<BlogResponseDto> {
+    @ApiOkResponse({ type: BlogResponseDto }) 
+    async find(@Param('id') id: number, @Request() req): Promise<BlogResponseDto> { 
         return this.blogService.findOne(id,req.user.id)
     };
 

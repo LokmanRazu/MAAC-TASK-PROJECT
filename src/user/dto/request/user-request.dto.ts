@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsIn, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class UserRequestDto {
 
@@ -17,6 +17,12 @@ export class UserRequestDto {
     @IsNotEmpty()
     @IsString()
     password: string;
+    
+    @ApiProperty({ enum: ['user', 'admin'] })
+    @IsNotEmpty()
+    @IsIn(['user', 'admin'])
+    role: 'user' | 'admin';
+
 
 }
 
@@ -28,3 +34,4 @@ export class UserUpdateRequestDto {
     name: string;
 
 }
+

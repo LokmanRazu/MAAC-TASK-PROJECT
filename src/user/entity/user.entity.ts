@@ -1,9 +1,9 @@
-import { Column, HasMany, IsEmail, Model, Table, Unique } from "sequelize-typescript";
+import { Column, DataType, HasMany, IsEmail, Model, Table, Unique } from "sequelize-typescript";
 import { Blog } from "src/blog/entity/blog.entity";
 import { Comment } from "src/blog/entity/comment.entity";
 
 @Table
-export class User extends Model<User>{
+export class User extends Model<User> {
     @Column({
         primaryKey: true,
         autoIncrement: true
@@ -11,25 +11,32 @@ export class User extends Model<User>{
     id: number;
 
     @Column({
-        allowNull:false 
+        allowNull: false
     })
     name: string
 
     @Unique
     @IsEmail
     @Column({
-        allowNull:false
+        allowNull: false
     })
     email: string
 
     @Column({
-        allowNull:false
+        allowNull: false
     })
-    password:string;
+    password: string;
 
-    @HasMany(()=> Blog)
-    blogs:Blog[];
+    @Column({
+        type: DataType.ENUM("admin", "user"),
+        allowNull: false,
+        defaultValue: "user",
+    })
+    role: "admin" | "user";
 
-    @HasMany(()=> Comment)
-    comment:Comment[];
+    @HasMany(() => Blog)
+    blogs: Blog[];
+
+    @HasMany(() => Comment) 
+    comment: Comment[];
 };

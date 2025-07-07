@@ -46,11 +46,12 @@ export class UserService {
     };
 
     async creat(dto: UserRequestDto): Promise<UserResponseDto> {
-        let { name, email, password } = dto;
+        let { name, email, password ,role} = dto;
         let data = await this.userModel.create({
             name,
             email,
-            password: hashPassword(password)
+            password: hashPassword(password),
+            role
         });
         return plainToInstance(UserResponseDto, data, {
             enableImplicitConversion: true,

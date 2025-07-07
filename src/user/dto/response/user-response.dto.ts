@@ -22,4 +22,8 @@ export class UserResponseDtoWithPassword extends  UserResponseDto{
     @Expose()
     password: string; 
 
+    @ApiProperty()
+    @Expose()
+    role: string; 
+
 }

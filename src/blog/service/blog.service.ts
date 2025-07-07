@@ -23,7 +23,7 @@ export class BlogService {
         }
 
         await this.tagMappedService.deleteMapTag(blog.id, tagId)
-        return "Ok"
+        return "Delete Sucessfully"
     }
 
     async addBlogTag(blogId: number, dto: AddBlogTag, userId: number) {
@@ -52,14 +52,16 @@ export class BlogService {
 
         blogs.forEach(blog => {
             let assignMappedTagIds = mappedTags.filter(mapTag => mapTag.blogId === blog.id);
-            console.log("assignTagIds", assignMappedTagIds)
-            let assignTags = [];
+           let assignTags = [];
+             console.log("assignTagIds", assignMappedTagIds)
+            console.log('AssignTagssss', assignTags);
             assignMappedTagIds.forEach(mappedTag => {
                 let tag = tags.find(tag => tag.id == mappedTag.tagId);
                 assignTags.push(tag)
             })
             blog['tags'] = assignTags
         })
+        console.log('blogsssss', blogs);
     
         return plainToInstance(BlogResponseDto, blogs, {
             enableImplicitConversion: true,
@@ -69,6 +71,9 @@ export class BlogService {
 
     async findOne(id: number, userId): Promise<BlogResponseDto> {
         let blog = await this.blogModel.findOne({ where: { id, userId: userId }, raw: true });
+        if(!blog){
+            throw new NotFoundException()
+        }
         let mappedTags = await this.tagMappedService.findAllByBlogId(blog.id);
         let tags = []
 
