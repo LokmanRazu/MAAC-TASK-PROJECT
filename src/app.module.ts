@@ -13,11 +13,11 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [
     ConfigModule.forRoot({isGlobal:true}), 
     MongooseModule.forRoot('mongodb+srv://lokman:mongo123@cluster0.xox6gl3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'),
-    // UserModule,
-    // BlogModule,
-    // AuthModule
+    UserModule,
+    BlogModule,
+    AuthModule
   ],
-  controllers: [AppController], 
+  controllers: [AppController],  
   providers: [AppService],
 })
 export class AppModule {}
