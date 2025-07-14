@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException} from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model, Types } from 'mongoose';
 import { plainToInstance } from "class-transformer";
-import { Blog } from "../entity/blog.entity";
+import { Blog, BlogDocument } from "src/schemas/blog.schema";
 import { BlogResponseDto } from "../dto/response/blog-response.dtp";
 import { BlogRequestDto, UpdateBlogRequestDto } from "../dto/request/blog-request.dto";
-import { User } from "src/user/entity/user.entity";
+import { User } from "src/schemas/user.schema"; // Assuming User schema is also in src/schemas
 import { BlogTagMappedService } from "./blogTagMapped.service";
 import { TagService } from "./tag.service";
 import { AddBlogTag } from "../dto/request/add-mapped-tag.dto";
@@ -12,97 +13,107 @@ import { AddBlogTag } from "../dto/request/add-mapped-tag.dto";
 @Injectable()
 export class BlogService {
 
+    constructor(
+        @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
+        private tagMappedService: BlogTagMappedService,
+        private tagService: TagService
+    ) { }
 
-    constructor(@InjectModel(Blog) private blogModel: typeof Blog, private tagMappedService: BlogTagMappedService, private tagService: TagService) {
-    }
-
-    async deleteBlogTag(id: number, tagId: number, userId: number) {
-        let blog = await this.blogModel.findOne({ where: { id, userId: userId }, raw: true });
+    async deleteBlogTag(id: string, tagId: string, userId: string) {
+        let blog = await this.blogModel.findOne({ _id: id, userId: new Types.ObjectId(userId) }).exec();
         if (!blog) {
             throw new NotFoundException()
         }
 
-        await this.tagMappedService.deleteMapTag(blog.id, tagId)
+        await this.tagMappedService.deleteMapTag(blog._id.toString(), tagId)
         return "Delete Sucessfully"
     }
 
-    async addBlogTag(blogId: number, dto: AddBlogTag, userId: number) {
-        let blog = await this.blogModel.findOne({ where: { id: blogId, userId: userId }, raw: true });
+    async addBlogTag(blogId: string, dto: AddBlogTag, userId: string) {
+        let blog = await this.blogModel.findOne({ _id: blogId, userId: new Types.ObjectId(userId) }).exec();
         if (!blog) {
             throw new NotFoundException()
         }
-        await this.tagMappedService.addBlogTag(blog.id, dto.tagId)
+        await this.tagMappedService.addBlogTag(blog._id.toString(), dto.tagId)
         return "Ok"
     }
 
-    async findAll(userId: number): Promise<BlogResponseDto[]> {
+    async findAll(userId: string): Promise<BlogResponseDto[]> {
+        console.log("Fetching blogs for userId:", userId);
+        let blogs = await this.blogModel.find({ userId: new Types.ObjectId(userId) })
+            .populate('userId') // Populate the user
+            .exec();
+        console.log("Fetched blogs:", blogs);
 
-        let blogs = await this.blogModel.findAll({
-            where: {
-                userId: userId
-            }
-        });
-        let blogIds = blogs.map(blog => blog.id)
+        // Manually populate tags since it's a many-to-many relationship via BlogTagMapped
+        let blogIds = blogs.map(blog => blog._id.toString())
+        console.log("Extracted blogIds:", blogIds);
         let mappedTags = await this.tagMappedService.findAllByBlogIds(blogIds)
+        console.log("Fetched mappedTags:", mappedTags);
         let tags = [];
         if (mappedTags.length > 0) {
             let tagIds = mappedTags.map(mapTag => mapTag.tagId);
+            console.log("Extracted tagIds from mappedTags:", tagIds);
             tags = await this.tagService.findByIds(tagIds)
+            console.log("Fetched actual tags:", tags);
         }
 
         blogs.forEach(blog => {
-            let assignMappedTagIds = mappedTags.filter(mapTag => mapTag.blogId === blog.id);
-           let assignTags = [];
-             console.log("assignTagIds", assignMappedTagIds)
-            console.log('AssignTagssss', assignTags);
+            let assignMappedTagIds = mappedTags.filter(mapTag => mapTag.blogId.toString() === blog._id.toString());
+            let assignTags = [];
+            console.log(`Assigning tags for blog ${blog._id}:`, assignMappedTagIds);
             assignMappedTagIds.forEach(mappedTag => {
-                let tag = tags.find(tag => tag.id == mappedTag.tagId);
-                assignTags.push(tag)
+                let tag = tags.find(tag => tag._id.toString() == mappedTag.tagId);
+                if (tag) {
+                    assignTags.push(tag);
+                }
             })
-            blog['tags'] = assignTags
+            blog['tags'] = assignTags;
+            console.log(`Final tags for blog ${blog._id}:`, blog['tags']);
         })
-        console.log('blogsssss', blogs);
-    
+
         return plainToInstance(BlogResponseDto, blogs, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
     };
 
-    async findOne(id: number, userId): Promise<BlogResponseDto> {
-        let blog = await this.blogModel.findOne({ where: { id, userId: userId }, raw: true });
-        if(!blog){
+    async findOne(id: string, userId: string): Promise<BlogResponseDto> {
+        let blog = await this.blogModel.findOne({ _id: id, userId: new Types.ObjectId(userId) })
+            .populate('userId') // Populate the user
+            .exec();
+        if (!blog) {
             throw new NotFoundException()
         }
-        let mappedTags = await this.tagMappedService.findAllByBlogId(blog.id);
+        let mappedTags = await this.tagMappedService.findAllByBlogId(blog._id.toString());
         let tags = []
 
         if (mappedTags.length > 0) {
             let tagIds = mappedTags.map(mapTag => mapTag.tagId)
             tags = await this.tagService.findByIds(tagIds)
         }
-        return plainToInstance(BlogResponseDto, { ...blog, tags }, {
+        return plainToInstance(BlogResponseDto, { ...blog.toObject(), tags }, { // .toObject() to convert Mongoose document to plain object
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
     };
 
-    async findBlogByIdAndUserId(id: number, userId): Promise<Blog> {
-        let blog = await this.blogModel.findOne({ where: { id, userId: userId }, raw: true });
+    async findBlogByIdAndUserId(id: string, userId: string): Promise<BlogDocument> {
+        let blog = await this.blogModel.findOne({ _id: id, userId: new Types.ObjectId(userId) }).exec();
         return blog
     };
 
-    async findBlogById(id: number): Promise<Blog> {
-        let blog = await this.blogModel.findOne({ where: { id }, raw: true });
+    async findBlogById(id: string): Promise<BlogDocument> {
+        let blog = await this.blogModel.findById(id).exec();
         return blog
     };
 
-    async create(dto: BlogRequestDto, userId: number): Promise<BlogResponseDto> {
+    async create(dto: BlogRequestDto, userId: string): Promise<BlogResponseDto> {
         let { title, body, tagIds } = dto;
         let blog = await this.blogModel.create({
             title,
             body,
-            userId
+            userId: new Types.ObjectId(userId)
         });
 
         if (tagIds.length > 0) {
@@ -110,46 +121,41 @@ export class BlogService {
 
             tagIds.forEach(id => {
                 payload.push({
-                    blogId: blog.id,
-                    tagId: +id
+                    blogId: blog._id,
+                    tagId: new Types.ObjectId(id)
                 })
             })
             await this.tagMappedService.create(payload)
         }
 
-        return plainToInstance(BlogResponseDto, blog, {
+        return plainToInstance(BlogResponseDto, blog.toObject(), { // .toObject() to convert Mongoose document to plain object
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
     };
 
-    async update(id: number, dto: UpdateBlogRequestDto, userId: any): Promise<String> {
+    async update(id: string, dto: UpdateBlogRequestDto, userId: string): Promise<String> {
 
-        let blog = await this.blogModel.findOne({ where: { id, userId: userId } })
+        let blog = await this.blogModel.findOne({ _id: id, userId: new Types.ObjectId(userId) }).exec();
         if (!blog) {
             throw new NotFoundException()
         }
 
-        await this.blogModel.update({ ...blog, ...dto }, {
-            where: {
-                id
-            }
-        })
+        await this.blogModel.findByIdAndUpdate(id, dto, { new: true }).exec();
         return "Update Sucessfull"
 
     };
 
-    async delete(id: number, userId: number): Promise<String> {
-        let blog = await this.blogModel.findOne({ where: { id, userId: userId } })
+    async delete(id: string, userId: string): Promise<String> {
+        if (!Types.ObjectId.isValid(id)) {
+            throw new NotFoundException('Invalid Blog ID format');
+        }
+        let blog = await this.blogModel.findOne({ _id: id, userId: new Types.ObjectId(userId) }).exec();
         if (!blog) {
             throw new NotFoundException()
         }
 
-        await this.blogModel.destroy({
-            where: {
-                id: blog.id
-            }
-        })
+        await this.blogModel.findByIdAndDelete(blog._id).exec();
         return "Delete Sucessfully"
     };
 

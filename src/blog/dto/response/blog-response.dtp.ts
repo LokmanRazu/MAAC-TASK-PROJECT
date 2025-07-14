@@ -1,11 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose, Transform } from "class-transformer";
+import { UserResponseDto } from "src/user/dto/response/user-response.dto";
 
 
 export class Tag {
     @ApiProperty()
     @Expose()
-    id: number;
+    id: string;
 
     @ApiProperty()
     @Expose()
@@ -15,7 +16,7 @@ export class Tag {
 export class BlogResponseDto {
     @ApiProperty()
     @Expose()
-    id: number;
+    id: string;
 
     @ApiProperty()
     @Expose()
@@ -27,11 +28,15 @@ export class BlogResponseDto {
 
     @ApiProperty()
     @Expose()
-    userId: number;
+    userId: string;
 
-    @ApiProperty()
+    @ApiProperty({ type: UserResponseDto })
     @Expose()
-    @Transform(value=>value.obj?.tags??[])
+    user: UserResponseDto;
+
+    @ApiProperty({ type: [Tag] })
+    @Expose()
+    @Transform(({ obj }) => obj.tags || [])
     tags: Tag[]
 
 }

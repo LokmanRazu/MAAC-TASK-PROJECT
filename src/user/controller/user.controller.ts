@@ -22,7 +22,7 @@ export class UserController {
 
     @Put('update-profile')
     @ApiOkResponse({ type: UserResponseDto })
-    async update(@Request() req, @Body() dto: UserUpdateRequestDto): Promise<UserResponseDto> {
+    async update(@Request() req: { user: { id: string } }, @Body() dto: UserUpdateRequestDto): Promise<UserResponseDto> {
         return await this.userService.update(req.user.id, dto);
     };
 

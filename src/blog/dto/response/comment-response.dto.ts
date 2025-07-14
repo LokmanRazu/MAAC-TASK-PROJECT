@@ -22,11 +22,11 @@ export class CommentResponseDto {
 
     @ApiProperty()
     @Expose()
-    blogId: number;
+    blogId: string;
 
     @ApiProperty()
     @Expose()
-    id: number;
+    id: string;
 
     
     @ApiProperty()

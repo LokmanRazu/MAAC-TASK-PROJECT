@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from 'mongoose';
 import { plainToInstance } from "class-transformer";
-import { Tag } from "../entity/tag.entity";
+import { Tag, TagDocument } from "src/schemas/tag.schema";
 import { TagResponseDto } from "../dto/response/tag-response.dto";
 import { TagRequestDto } from "../dto/request/tag-request.dto";
 
@@ -9,29 +10,26 @@ import { TagRequestDto } from "../dto/request/tag-request.dto";
 @Injectable()
 export class TagService {
   
-    constructor(@InjectModel(Tag) private tagModel: typeof Tag) {
+    constructor(@InjectModel(Tag.name) private tagModel: Model<TagDocument>) {
     }
 
     async findAll(): Promise<TagResponseDto[]> {
-        let data = await this.tagModel.findAll();
+        let data = await this.tagModel.find().exec();
         return plainToInstance(TagResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
     };
 
-    findByIds(tagIds: number[]):PromiseLike<Tag[]> {
+    findByIds(tagIds: string[]):Promise<TagDocument[]> {
         
-       return this.tagModel.findAll({
-        where:{
-            id: tagIds
-        },
-        raw: true
-       })
+       return this.tagModel.find({
+        _id: { $in: tagIds }
+       }).exec()
     }
 
-    async findOne(id: number): Promise<TagResponseDto> {
-        let data = await this.tagModel.findOne({ where: { id }});
+    async findOne(id: string): Promise<TagResponseDto> {
+        let data = await this.tagModel.findById(id).exec();
         return plainToInstance(TagResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
@@ -49,9 +47,8 @@ export class TagService {
         });
     };
 
-    async update(id: number, dto: TagRequestDto): Promise<TagResponseDto> {
-        let user = await this.tagModel.findByPk(id);
-        let data = await user.update(dto);
+    async update(id: string, dto: TagRequestDto): Promise<TagResponseDto> {
+        let data = await this.tagModel.findByIdAndUpdate(id, dto, { new: true }).exec();
         return plainToInstance(TagResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
@@ -59,9 +56,8 @@ export class TagService {
 
     };
 
-    async delete(id: number): Promise<TagResponseDto> {
-        let user = await this.tagModel.findByPk(id);
-        let data = await user.destroy()
+    async delete(id: string): Promise<TagResponseDto> {
+        let data = await this.tagModel.findByIdAndDelete(id).exec();
         return plainToInstance(TagResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true

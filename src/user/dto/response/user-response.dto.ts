@@ -5,7 +5,7 @@ import { Expose } from "class-transformer";
 export class UserResponseDto {
     @ApiProperty()
     @Expose()
-    id: number;
+    id: string;
 
     @ApiProperty()
     @Expose()

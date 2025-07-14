@@ -19,7 +19,7 @@ export class CommentResponseDto{
 
     @ApiProperty()
     @Expose()
-    id: number;
+    id: string;
 
     @ApiProperty()
     @Expose()

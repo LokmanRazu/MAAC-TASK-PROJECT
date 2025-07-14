@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { SequelizeModule } from "@nestjs/sequelize";
-import { User } from "./entity/user.entity";
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from 'src/schemas/user.schema';
 import { UserController } from "./controller/user.controller";
 import { UserService } from "./service/user.service";
 import { PassportModule } from "@nestjs/passport";
@@ -8,7 +8,7 @@ import { PassportModule } from "@nestjs/passport";
 @Module({
     imports:[
         PassportModule.register({defaultStrategy:'jwt'}),
-        SequelizeModule.forFeature([User]),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     ],
     controllers:[UserController],
     providers:[UserService],

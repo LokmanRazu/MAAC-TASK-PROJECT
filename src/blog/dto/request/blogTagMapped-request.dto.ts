@@ -1,16 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty,  IsNumber } from "class-validator";
+import { IsNotEmpty } from "class-validator";
 
 export class BlogTagMappedRequestDto {
     @ApiProperty()
     @IsNotEmpty()
-    @IsNumber()
-    blogId: number;
+    blogId: string;
 
     @ApiProperty()
     @IsNotEmpty()
-    @IsNumber()
-    tagId: number;
+    tagId: string;
 
 
 }

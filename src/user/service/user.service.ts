@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { User } from "../entity/user.entity";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from 'mongoose';
+import { User, UserDocument } from 'src/schemas/user.schema';
 import { UserResponseDto, UserResponseDtoWithPassword } from "../dto/response/user-response.dto";
 import { UserRequestDto, UserUpdateRequestDto } from "../dto/request/user-request.dto";
 import { hashPassword } from "src/common/utils/utils";
@@ -8,29 +9,24 @@ import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class UserService {
-    constructor(@InjectModel(User) private userModel: typeof User) {
+    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {
     }
 
     async findAll(): Promise<UserResponseDto[]> {
-        let data = await this.userModel.findAll();
+        let data = await this.userModel.find().exec();
         return plainToInstance(UserResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         });
     };
 
-    async findUsersByIds(userIds): Promise<User[]> {
-        let data = await this.userModel.findAll({
-            where: {
-                id: userIds
-            },
-            raw:true
-        });
+    async findUsersByIds(userIds: string[]): Promise<User[]> {
+        let data = await this.userModel.find({ _id: { $in: userIds } }).exec();
         return data;
     };
 
-    async findOne(id: number): Promise<UserResponseDto> {
-        let data = await this.userModel.findOne({ where: { id }, });
+    async findOne(id: string): Promise<UserResponseDto> {
+        let data = await this.userModel.findById(id).exec();
         return plainToInstance(UserResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
@@ -38,7 +34,7 @@ export class UserService {
     };
 
     async findOneByEmail(email: string): Promise<UserResponseDtoWithPassword> {
-        let data = await this.userModel.findOne({ where: { email }, });
+        let data = await this.userModel.findOne({ email }).exec();
         return plainToInstance(UserResponseDtoWithPassword, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
@@ -59,9 +55,8 @@ export class UserService {
         });
     };
 
-    async update(id: number, dto: UserUpdateRequestDto): Promise<UserResponseDto> {
-        let user = await this.userModel.findByPk(id);
-        let data = await user.update(dto);
+    async update(id: string, dto: UserUpdateRequestDto): Promise<UserResponseDto> {
+        let data = await this.userModel.findByIdAndUpdate(id, dto, { new: true }).exec();
         return plainToInstance(UserResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
@@ -69,18 +64,13 @@ export class UserService {
 
     };
 
-    async delete(id: number): Promise<UserResponseDto> {
-        let user = await this.userModel.findByPk(id);
-
-        console.log("user        rr   " + user)
-        let data = await user.destroy()
+    async delete(id: string): Promise<UserResponseDto> {
+        let data = await this.userModel.findByIdAndDelete(id).exec();
         return plainToInstance(UserResponseDto, data, {
             enableImplicitConversion: true,
             excludeExtraneousValues: true
         })
 
     };
-
-
 
 }

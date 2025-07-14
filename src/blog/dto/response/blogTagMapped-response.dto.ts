@@ -5,15 +5,15 @@ import { Expose } from "class-transformer";
 export class BlogTagMappedResponseDto {
     @ApiProperty()
     @Expose()
-    id: number;
-g;
-    @ApiProperty()
-    @Expose()
-    blogId: number;
+    id: string;
 
     @ApiProperty()
     @Expose()
-    tagId: number;
+    blogId: string;
+
+    @ApiProperty()
+    @Expose()
+    tagId: string;
 
 
 }
